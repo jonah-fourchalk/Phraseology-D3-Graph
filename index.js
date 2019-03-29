@@ -1,77 +1,87 @@
 var data = [{
-    "Client": "ABC",
-    "sale": "202",
-    "year": "2000"
+    "name": "Jonah",
+    "norm": "202",
+    "date": "1999"
 }, {
-    "Client": "ABC",
-    "sale": "215",
-    "year": "2002"
+    "name": "Jonah",
+    "norm": "215",
+    "date": "2002"
 }, {
-    "Client": "ABC",
-    "sale": "179",
-    "year": "2004"
+    "name": "Jonah",
+    "norm": "179",
+    "date": "2004"
 }, {
-    "Client": "ABC",
-    "sale": "199",
-    "year": "2006"
+    "name": "Jonah",
+    "norm": "199",
+    "date": "2006"
 }, {
-    "Client": "ABC",
-    "sale": "134",
-    "year": "2008"
+    "name": "Jonah",
+    "norm": "134",
+    "date": "2008"
 }, {
-    "Client": "ABC",
-    "sale": "176",
-    "year": "2010"
+    "name": "Jonah",
+    "norm": "176",
+    "date": "2010"
 }, {
-    "Client": "XYZ",
-    "sale": "100",
-    "year": "2000"
+    "name": "Jonah",
+    "norm": "185",
+    "date": "2013"
 }, {
-    "Client": "XYZ",
-    "sale": "215",
-    "year": "2002"
+    "name": "Alishba",
+    "norm": "100",
+    "date": "2000"
 }, {
-    "Client": "XYZ",
-    "sale": "179",
-    "year": "2004"
+    "name": "Alishba",
+    "norm": "215",
+    "date": "2002"
 }, {
-    "Client": "XYZ",
-    "sale": "199",
-    "year": "2006"
+    "name": "Alishba",
+    "norm": "179",
+    "date": "2004"
 }, {
-    "Client": "XYZ",
-    "sale": "134",
-    "year": "2008"
+    "name": "Alishba",
+    "norm": "199",
+    "date": "2006"
 }, {
-    "Client": "XYZ",
-    "sale": "176",
-    "year": "2013"
+    "name": "Alishba",
+    "norm": "134",
+    "date": "2008"
+}, {
+    "name": "Alishba",
+    "norm": "176",
+    "date": "2013"
 }];
 
 var dataGroup = d3.nest()
     .key(function(d) {
-        return d.Client;
+        return d.name;
     })
     .entries(data);
 
 var vis = d3.select("#visualisation"),
-    WIDTH = 1000,
-    HEIGHT = 500,
+    w = window,
+    d = document,
+    e = d.documentElement,
+    g = d.getElementsByTagName('body')[0],
+    WIDTH = (w.innerWidth || e.clientWidth || g.clientWidth)*(9/10),
+    HEIGHT = w.innerHeight|| e.clientHeight|| g.clientHeight,
     MARGINS = {
         top: 50,
         right: 70,
-        bottom: 50,
-        left: 100
+        bottom: 40,
+        left: 60
     },
     xScale = d3.scaleLinear().range([MARGINS.left, WIDTH - MARGINS.right]).domain([d3.min(data, function(d) {
-        return d.year;
+        return d.date
+;
     }), d3.max(data, function(d) {
-        return d.year;
+        return d.date
+;
     })]),
     yScale = d3.scaleLinear().range([HEIGHT - MARGINS.top, MARGINS.bottom]).domain([d3.min(data, function(d) {
-        return d.sale;
+        return d.norm;
     }), d3.max(data, function(d) {
-        return d.sale;
+        return d.norm;
     })]),
     xAxis = d3.axisBottom()
         .scale(xScale),
@@ -79,12 +89,9 @@ var vis = d3.select("#visualisation"),
     yAxis = d3.axisLeft()
         .scale(yScale);
 
-    zAxis = d3Scale.scaleOrdinal(d3ScaleChromatic.schemeCategory10);
-    zAxis.domain(data.map(function (c) { return c.Client; }));
-
 vis.append("svg:g")
     .attr("class","axis")
-    .attr("transform", "translate(0," + (HEIGHT - MARGINS.bottom) + ")")
+    .attr("transform", "translate(0," + (HEIGHT - MARGINS.bottom - 10) + ")")
     .call(xAxis);
     
 vis.append("svg:g")
@@ -97,7 +104,7 @@ vis.append("text")
         "translate(" + (WIDTH/2) + " ," + 
                         (HEIGHT + MARGINS.top - 50) + ")")
     .style("text-anchor", "middle")
-    .text("Year");
+    .text("Date");
 
 vis.append("text")
     .attr("transform", "rotate(-90)")
@@ -105,24 +112,24 @@ vis.append("text")
     .attr("x",0 - (HEIGHT/2))
     .attr("dy", "1em")
     .style("text-anchor", "middle")
-    .text("Sales"); 
+    .text("Emails Normalized"); 
 
 var lineGen = d3.line()
     .x(function(d) {
-      return xScale(d.year);
+      return xScale(d.date);
     })
     .y(function(d) {
-      return yScale(d.sale);
+      return yScale(d.norm);
     })
     .curve(d3.curveCardinal);
 
-function color() {
-    return "hsl(" + Math.random() * 360 + ",100%,50%)";
-}
+    var colors = new Array(dataGroup.length);
+    for (var i = 0; i < colors.length; i++) {
+        colors[i] = "hsl(" + (i * (360/colors.length)) + ", 100%, 50%)";
+    }
 
-println(zAxis);
 dataGroup.forEach(function(d, i) {
-    var colored = color();
+    var colored = colors[i];
     vis.append('svg:path')
         .attr('d', lineGen(d.values))
         .attr('stroke', colored)
@@ -148,5 +155,5 @@ dataGroup.forEach(function(d, i) {
             .style("fill", colored)
             .attr("cx", WIDTH - 55)
             .attr("cy", ((lSpace / 2) + i * lSpace) - 5)
-            .attr("r", 5);
+            .attr("r", 7);
 });

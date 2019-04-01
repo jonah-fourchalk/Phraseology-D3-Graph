@@ -46,7 +46,7 @@
     var numberOfPoints = 100;
     var pointRadius = 9;
 
-    d3.json('./iris_pca.json', function(data) {
+    d3.json('iris_pca.json', function(data) {
         var labels = d3.set(data.map(function(d) {
             return d.label;
         })).values();

@@ -20,7 +20,7 @@
     <svg id="visualisation" class="svg-content" width="1200" height="800" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid meet"></svg>
     </div>
     <script>
-        d3.json("data.json", function(error, data) {
+        d3.json("../data.json", function(error, data) {
             if (error) throw error;
 
             var dataGroup = d3.nest()

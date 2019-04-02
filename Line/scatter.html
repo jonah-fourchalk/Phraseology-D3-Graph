@@ -43,12 +43,13 @@
     var width = 600 - margin.left - margin.right;
     var height = 400 - margin.top - margin.bottom;
 
+
     var numberOfPoints = 100;
     var pointRadius = 9;
 
     d3.json('iris_pca.json', function(data) {
-        var labels = d3.set(data.map(function(d) {
-            return d.label;
+        var names = d3.set(data.map(function(d) {
+            return d.name;
         })).values();
 
 
@@ -67,11 +68,11 @@
             .range([height, 0]);
 
         var colourScale = d3.scale.ordinal()
-            .domain(labels)
+            .domain(names)
             .range(['#e41a1c', '#377eb8', '#4daf4a', '#yellow', '#2eb38s', '#pink']);
 
         var shapeScale = d3.scale.ordinal()
-            .domain(labels)
+            .domain(names)
             .range([d3_shape.symbolCircle, d3_shape.symbolCross,
                 d3_shape.symbolSquare]);
 
@@ -148,7 +149,7 @@
             .attr('stroke', 'black')
             .attr('fill', 'white');
 
-        labels.forEach(function(d, i) {
+        names.forEach(function(d, i) {
             var x = pointRadius + 10;
             var y = 23 + i * 20;
 
@@ -184,12 +185,12 @@
                 var y = Math.round(yScale(d.y));
 
                 var symbol = d3_shape.symbol()
-                    .type(shapeScale(d.label))
+                    .type(shapeScale(d.name))
                     .size(pointRadius * pointRadius)
                     .context(context);
 
                 context.translate(x, y);
-                context.fillStyle = colourScale(d.label);
+                context.fillStyle = colourScale(d.name);
                 context.beginPath();
                 symbol();
                 context.closePath();

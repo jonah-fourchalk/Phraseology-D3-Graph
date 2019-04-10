@@ -1,71 +1,152 @@
 <!DOCTYPE html>
-<meta charset="utf-8">
-<style> /* set the CSS */
-
-.bar { fill: steelblue; }
-
+<style>
+  .axis .domain {
+    display: none;
+  }
 </style>
-<body>
-	
-<!-- load the d3.js library -->    	
-<script src="//d3js.org/d3.v4.min.js"></script>
+<svg width="960" height="500"></svg>
+<script src="https://d3js.org/d3.v4.min.js"></script>
 <script>
+  var svg = d3.select("svg"),
+    margin = {
+      top: 20,
+      right: 20,
+      bottom: 30,
+      left: 40
+    },
+    width = +svg.attr("width") - margin.left - margin.right,
+    height = +svg.attr("height") - margin.top - margin.bottom,
+    g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-// set the dimensions and margins of the graph
-var margin = {top: 20, right: 20, bottom: 30, left: 40},
-    width = 960 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
+  var x = d3.scaleBand()
+    .rangeRound([0, width])
+    .paddingInner(0.05)
+    .align(0.1);
 
-// set the ranges
-var x = d3.scaleBand()
-          .range([0, width])
-          .padding(0.1);
-var y = d3.scaleLinear()
-          .range([height, 0]);
-          
-// append the svg object to the body of the page
-// append a 'group' element to 'svg'
-// moves the 'group' element to the top left margin
-var svg = d3.select("body").append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-    .attr("transform", 
-          "translate(" + margin.left + "," + margin.top + ")");
+  var y = d3.scaleLinear()
+    .rangeRound([height, 0]);
 
-// get the data
-d3.json("../data.json", function(error, data) {
-  if (error) throw error;
+  var z = d3.scaleOrdinal()
+    .range(["#98abc5", "#6b486b", "#ff8c00"]);
 
-  // format the data
-  data.forEach(function(d) {
-    d.norm = +d.norm;
+  var data = [{
+    "name": "Jonah",
+    "Easy": 32,
+    "Medium": 62,
+    "Complex": 33
+  }, {
+    "name": "Evan",
+    "Easy": 52,
+    "Medium": 88,
+    "Complex": 41
+  }, {
+    "name": "Alan",
+    "Easy": 43,
+    "Medium": 75,
+    "Complex": 35
+  }, {
+    "name": "Alishba",
+    "Easy": 10,
+    "Medium": 18,
+    "Complex": 91
+  }, {
+    "name": "Quinn",
+    "Easy": 36,
+    "Medium": 64,
+    "Complex": 31
+  }, {
+    "name": "Emily",
+    "Easy": 38,
+    "Medium": 60,
+    "Complex": 29
+  }];
+
+  // fix pre-processing
+  var keys = [];
+  for (key in data[0]){
+    if (key != "name")
+      keys.push(key);
+  }
+  data.forEach(function(d){
+    d.total = 0;
+    keys.forEach(function(k){
+      d.total += d[k];
+    })
   });
 
-  // Scale the range of the data in the domains
-  x.domain(data.map(function(d) { return d.name; }));
-  y.domain([0, d3.max(data, function(d) { return d.norm; })]);
+  data.sort(function(a, b) {
+    return b.total - a.total;
+  });
+  x.domain(data.map(function(d) {
+    return d.name;
+  }));
+  y.domain([0, d3.max(data, function(d) {
+    return d.total;
+  })]).nice();
+  z.domain(keys);
 
-  // append the rectangles for the bar chart
-  svg.selectAll(".bar")
-      .data(data)
+  g.append("g")
+    .selectAll("g")
+    .data(d3.stack().keys(keys)(data))
+    .enter().append("g")
+    .attr("fill", function(d) {
+      return z(d.key);
+    })
+    .selectAll("rect")
+    .data(function(d) {
+      return d;
+    })
     .enter().append("rect")
-      .attr("class", "bar")
-      .attr("x", function(d) { return x(d.name); })
-      .attr("width", x.bandwidth())
-      .attr("y", function(d) { return y(d.norm); })
-      .attr("height", function(d) { return height - y(d.norm); });
+    .attr("x", function(d) {
+      return x(d.data.name);
+    })
+    .attr("y", function(d) {
+      return y(d[1]);
+    })
+    .attr("height", function(d) {
+      return y(d[0]) - y(d[1]);
+    })
+    .attr("width", x.bandwidth());
 
-  // add the x Axis
-  svg.append("g")
-      .attr("transform", "translate(0," + height + ")")
-      .call(d3.axisBottom(x));
+  g.append("g")
+    .attr("class", "axis")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(x));
 
-  // add the y Axis
-  svg.append("g")
-      .call(d3.axisLeft(y));
+  g.append("g")
+    .attr("class", "axis")
+    .call(d3.axisLeft(y).ticks(null, "s"))
+    .append("text")
+    .attr("x", 2)
+    .attr("y", y(y.ticks().pop()) + 0.5)
+    .attr("dy", "0.32em")
+    .attr("fill", "#000")
+    .attr("font-weight", "bold")
+    .attr("text-anchor", "start")
+    .text("Population");
 
-});
+  var legend = g.append("g")
+    .attr("font-family", "sans-serif")
+    .attr("font-size", 10)
+    .attr("text-anchor", "end")
+    .selectAll("g")
+    .data(keys.slice().reverse())
+    .enter().append("g")
+    .attr("transform", function(d, i) {
+      return "translate(0," + i * 20 + ")";
+    });
 
+  legend.append("rect")
+    .attr("x", width - 19)
+    .attr("width", 19)
+    .attr("height", 19)
+    .attr("fill", z);
+
+  legend.append("text")
+    .attr("x", width - 24)
+    .attr("y", 9.5)
+    .attr("dy", "0.32em")
+    .text(function(d) {
+      return d;
+    });
 </script>
-</body>

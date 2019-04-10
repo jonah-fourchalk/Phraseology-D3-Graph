@@ -1,8 +1,17 @@
 <!DOCTYPE html>
+<<<<<<< HEAD
 <style>
   .axis .domain {
     display: none;
   }
+=======
+<meta charset="utf-8">
+<style> /* set the CSS */
+
+.bar { fill: red;
+opacity: 0.1; }
+
+>>>>>>> 900be8cbcaf83b5cccac4128ace80a4b4d1dba51
 </style>
 <svg width="960" height="500"></svg>
 <script src="https://d3js.org/d3.v4.min.js"></script>
@@ -29,6 +38,7 @@
   var z = d3.scaleOrdinal()
     .range(["#98abc5", "#6b486b", "#ff8c00"]);
 
+<<<<<<< HEAD
   var data = [{
     "name": "Jonah",
     "Easy": 32,
@@ -60,6 +70,12 @@
     "Medium": 60,
     "Complex": 29
   }];
+=======
+
+// get the data
+d3.json("../data.json", function(error, data) {
+  if (error) throw error;
+>>>>>>> 900be8cbcaf83b5cccac4128ace80a4b4d1dba51
 
   // fix pre-processing
   var keys = [];
